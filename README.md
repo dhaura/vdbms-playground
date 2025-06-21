@@ -1,1 +1,76 @@
 # vdbms-playground
+
+```bash
+python3 -m venv venv
+```
+
+## Qdrant
+
+### Local Build
+
+Clone Qdrant repo at https://github.com/qdrant/qdrant.
+
+1. Install rust and rustfmt.
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup install nightly
+rustup override set nightly
+rustup component add rustfmt
+```
+2. Install dependencies.
+```bash
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get install -y curl unzip gcc-multilib \
+    clang cmake jq build-essential
+```
+3. Install protoc from source.
+```bash
+PROTOC_VERSION=22.2
+PKG_NAME=$(uname -s | awk '{print ($1 == "Darwin") ? "osx-universal_binary" : (($1 == "Linux") ? "linux-x86_64" : "")}')
+
+# curl `proto` source file
+curl -LO https://github.com/protocolbuffers/protobuf/releases//download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-$PKG_NAME.zip
+
+unzip protoc-$PROTOC_VERSION-$PKG_NAME.zip -d $HOME/.local
+
+export PATH="$PATH:$HOME/.local/bin"
+
+# remove source file if not needed
+rm protoc-$PROTOC_VERSION-$PKG_NAME.zip
+
+# check installed `protoc` version
+protoc --version
+```
+4. Download the web UI resources.
+```bash
+./tools/sync-web-ui.sh
+```
+5. Build qdrant.
+```bash
+cargo build --release --bin qdrant
+```
+6. Run qgrant server.
+```bash
+./target/release/qdrant
+```
+7. Run automated tests.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install poetry
+poetry cache clear . --all
+cd tests
+poetry install
+poetry sync
+pip install poetry
+poetry run pytest openapi
+```
+8. Access the web UI at `http://localhost:6333/dashboard`
+9. Run a simple quickstart with (qdrant_test.py)[/qdrant/qdrant_test.py]
+    - Refer - https://qdrant.tech/documentation/quickstart/
+```bash
+source venv/bin/activate
+pip install qdrant-client
+python3 qdrant_test.py
+```
