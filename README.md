@@ -79,7 +79,9 @@ python3 qdrant_test.py
 
 ### Local Build
 
-1. Install PostgreSQL 15.
+Clone repo at https://github.com/pgvector/pgvector
+
+1. Install PostgreSQL 15
 ```bash
 sudo apt install curl ca-certificates gnupg lsb-release
 curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
@@ -109,17 +111,17 @@ https://github.com/pgvector/pgvector?tab=readme-ov-file#getting-started
 https://github.com/pgvector/pgvector?tab=readme-ov-file#hnsw
 ```
 
-4. View created indexes.
+5. View created indexes.
 ```bash
 \d items
 ```
 
-5. Query with explanation.
+6. Query with explanation.
 ```bash
 EXPLAIN ANALYZE SELECT * FROM items ORDER BY embedding <-> '[3,1,2]' LIMIT 5;
 ```
 
-6. Force indexing.
+7. Force indexing.
 ```bash
 SET enable_seqscan = OFF;
 ```
