@@ -74,3 +74,52 @@ source venv/bin/activate
 pip install qdrant-client
 python3 qdrant_test.py
 ```
+
+## PGVector
+
+### Local Build
+
+1. Install PostgreSQL 15.
+```bash
+sudo apt install curl ca-certificates gnupg lsb-release
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | \
+  sudo tee /etc/apt/sources.list.d/pgdg.list
+sudo apt update
+sudo apt install postgresql-15 postgresql-server-dev-15
+source ~/.zshrc
+```
+
+2. Build PGVector extension.
+```bash
+make
+sudo make PG_CONFIG=/usr/lib/postgresql/15/bin/pg_config install
+```
+
+3. Start PG Server and log in.
+```bash
+sudo pg_ctlcluster 15 main start
+pg_lsclusters # check status
+sudo -u postgres psql
+```
+
+4. Create a vector db.
+```bash
+https://github.com/pgvector/pgvector?tab=readme-ov-file#getting-started 
+https://github.com/pgvector/pgvector?tab=readme-ov-file#hnsw
+```
+
+4. View created indexes.
+```bash
+\d items
+```
+
+5. Query with explanation.
+```bash
+EXPLAIN ANALYZE SELECT * FROM items ORDER BY embedding <-> '[3,1,2]' LIMIT 5;
+```
+
+6. Force indexing.
+```bash
+SET enable_seqscan = OFF;
+```
