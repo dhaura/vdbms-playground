@@ -125,3 +125,25 @@ EXPLAIN ANALYZE SELECT * FROM items ORDER BY embedding <-> '[3,1,2]' LIMIT 5;
 ```bash
 SET enable_seqscan = OFF;
 ```
+
+## ClickHouse
+
+```bash
+git submodule update --init
+rustup toolchain install nightly-2024-12-01
+rustup default nightly-2024-12-01
+rustup component add rust-src
+module load cmake/3.30.2 llvm
+export PATH=$HOME/local/yasm/bin:$PATH
+export PATH=$HOME/local/nasm/bin:$PATH
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Debug ..
+```
+
+## Custom Vector Store
+
+```bash
+cd custom_vector_store
+git clone https://github.com/nmslib/hnswlib.git
+```

@@ -192,3 +192,11 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# VSCode settings
+.vscode/
+
+# Custom VDBMS
+custom_vector_store/hnswlib/
+custom_vector_store/*.db
+custom_vector_store/*.bin
