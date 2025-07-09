@@ -18,7 +18,7 @@ queries = [
     "How to make Italian food?"
 ]
 
-output_dir = "vdbms-playground/custom_vector_store/test/data"
+output_dir = "/home/dhaura/repos/vdbms-playground/custom_vector_store/test/data"
 embedding_model = "all-MiniLM-L6-v2"
 top_k = 1
 # Load SBERT model
@@ -32,11 +32,21 @@ doc_embs = model.encode(docs, normalize_embeddings=True)
 query_embs = model.encode(queries, normalize_embeddings=True)
 print("Encoding completed.")
 
-# Compute top-k ground truth neighbors
-print("Computing cosine similarity...")
-sims = cosine_similarity(query_embs, doc_embs)
-gt = np.argsort(-sims, axis=1)[:, :top_k]  # shape: (num_queries, top_k)
-print("Cosine similarity computed.")
+# Add ground truth neighbors.
+manual_qrels = {
+    0: [0],      # "What do cats do when happy?" → "Cats are great pets..."
+    1: [2],      # "What is quantum computing?" → "Quantum computing..."
+    2: [3]       # "How to make Italian food?" → "Pasta is a popular Italian dish."
+}
+num_queries = len(manual_qrels)
+top_k = 1
+
+gt = np.full((num_queries, top_k), fill_value=-1, dtype=np.int32)
+
+for qid in range(num_queries):
+    relevant_docs = manual_qrels.get(qid, [])
+    for k in range(min(top_k, len(relevant_docs))):
+        gt[qid][k] = relevant_docs[k]
 
 # Save files
 os.makedirs(output_dir, exist_ok=True)
