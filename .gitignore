@@ -198,5 +198,5 @@ cython_debug/
 
 # Custom VDBMS
 custom_vector_store/hnswlib/
-custom_vector_store/*.db
-custom_vector_store/*.bin
+*.db
+**/hnswlib_index.bin

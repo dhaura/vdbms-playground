@@ -133,7 +133,7 @@ git submodule update --init
 rustup toolchain install nightly-2024-12-01
 rustup default nightly-2024-12-01
 rustup component add rust-src
-module load cmake/3.30.2 llvm
+module load cmake/3.30.2 llvm/nightly
 export PATH=$HOME/local/yasm/bin:$PATH
 export PATH=$HOME/local/nasm/bin:$PATH
 mkdir build

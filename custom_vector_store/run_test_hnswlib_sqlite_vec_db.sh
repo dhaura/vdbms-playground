@@ -13,7 +13,7 @@ export HNSWLIB_ROOT=$SCRATCH/repos/vectorDBs/vdbms-playground/custom_vector_stor
 
 srun -n 1 build/test_hnswlib_sqlite_vec_db \
     -index_path $SCRATCH/repos/vectorDBs/vdbms-playground/custom_vector_store/test/data/hnswlib_index.bin \
-    -docs_path $SCRATCH/repos/vectorDBs/vdbms-playground/custom_vector_store/test/data/documents.bin \
+    -doc_path $SCRATCH/repos/vectorDBs/vdbms-playground/custom_vector_store/test/data/documents.db \
     -sf ip \
     -dim 384 \
     -k 3 \

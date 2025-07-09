@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <cstring>
 #include <fstream>
 
 #include "hnsw_sqlite_store_manager.cpp"
@@ -75,16 +76,23 @@ int main(int argc, char **argv)
 
     simpleVec::manager::HNSWSqliteStoreManager store_manager(dim, index_path, doc_path, similarity_function);
 
+    std::cout << "HNSW SQLite Store Manager initialized." << std::endl;
+
     // Add vectors.
     std::ifstream doc_file(input_doc_file);
     std::ifstream doc_embed_file(input_doc_embed_file, std::ios::binary);
     std::string line;
     int id = 0;
+
+    std::vector<float> doc_vectors(num_docs * dim);
+    doc_embed_file.read(reinterpret_cast<char*>(doc_vectors.data()), doc_vectors.size() * sizeof(float));
+    
     while (std::getline(doc_file, line))
     {
         std::vector<float> vector(dim);
-        doc_embed_file.read(reinterpret_cast<char*>(vector.data()), dim * sizeof(float));
+        std::memcpy(vector.data(), &doc_vectors[id * dim], dim * sizeof(float));
         std::string content = line;
+
         store_manager.add(id, vector, content);
         id++;
     }
@@ -92,13 +100,15 @@ int main(int argc, char **argv)
     doc_file.close();
     doc_embed_file.close();
 
+    std::cout << "Added " << num_docs << " docs and their embedding vectors to the store.\n" << std::endl;
+
     // Search for nearest neighbors.
     std::ifstream query_file_stream(query_file);
     std::ifstream query_embed_file_stream(query_embed_file, std::ios::binary);
     std::ifstream gt_file_stream(gt_file, std::ios::binary);
 
-    std::vector<std::vector<float>> query_vectors(num_queries, std::vector<float>(dim));
-    query_embed_file_stream.read(reinterpret_cast<char*>(query_vectors.data()), num_queries * dim * sizeof(float));
+    std::vector<float> query_vectors(num_queries * dim);
+    query_embed_file_stream.read(reinterpret_cast<char*>(query_vectors.data()), query_vectors.size() * sizeof(float));
 
     std::vector<int> gt_ids(num_queries);
     gt_file_stream.read(reinterpret_cast<char*>(gt_ids.data()), num_queries * sizeof(int));
@@ -107,11 +117,13 @@ int main(int argc, char **argv)
     int id_query = 0;
     while (std::getline(query_file_stream, line))
     {
-        std::vector<float> query_vector = query_vectors[id_query];
+        std::vector<float> query_vector(dim);
+        std::memcpy(query_vector.data(), &query_vectors[id_query * dim], dim * sizeof(float));
 
         std::string query_content = line;
         std::vector<std::pair<int, std::string>> results = store_manager.search(query_vector, k);
 
+        std::cout << "Ground Truth ID: " << gt_ids[id_query] << std::endl;
         std::cout << "Query: " << query_content << std::endl;
         std::cout << "Top " << k << " results:" << std::endl;
         for (const auto &result : results)
@@ -120,20 +132,14 @@ int main(int argc, char **argv)
         }
         std::cout << std::endl;
 
-        bool found = false;
         for (const auto &result : results)
         {
             if (result.first == gt_ids[id_query])
             {
-                found = true;
+                num_correct += 1.0f;
                 break;
             }
         }
-        if (found)
-        {
-            num_correct += 1.0f;
-        }
-
         id_query++;
     }
 
@@ -141,8 +147,8 @@ int main(int argc, char **argv)
     query_embed_file_stream.close();
     gt_file_stream.close();
 
-    float accuracy = num_correct / num_queries;
-    std::cout << "Final accuracy: " << accuracy << std::endl;
+    float recall = num_correct / num_queries;
+    std::cout << "Final Recall@K: " << recall << std::endl;
 
     return 0;
 }
