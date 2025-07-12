@@ -48,6 +48,9 @@ protoc --version
 ```
 5. Build qdrant.
 ```bash
+rustup install 1.87.0
+rustup override set 1.87.0
+module load llvm
 cargo build --release --bin qdrant
 ```
 6. Run qgrant server.
@@ -139,6 +142,7 @@ export PATH=$HOME/local/nasm/bin:$PATH
 mkdir build
 cd build
 cmake -D CMAKE_BUILD_TYPE=Debug ..
+ninja clickhouse
 ```
 
 ## Custom Vector Store
@@ -146,4 +150,49 @@ cmake -D CMAKE_BUILD_TYPE=Debug ..
 ```bash
 cd custom_vector_store
 git clone https://github.com/nmslib/hnswlib.git
+mkdir build
+cd build
+cmake ..
+make
 ```
+
+## milvus-lite
+```bash
+git clone https://github.com/milvus-io/milvus-lite.git
+cd milvus-lite
+git submodule update --init --recursive
+
+module load python gcc-native/13 cmake cray-libsci
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install "conan<2.0,>=1.59"
+export CONAN_USER_HOME=$SCRATCH/conan_cache
+mkdir -p $CONAN_USER_HOME
+conan profile new default --detect --force
+
+export CC=$(which gcc)
+export CXX=$(which g++)
+export CXXFLAGS="-pthread -std=c++17"
+export LDFLAGS="-pthread"
+
+conan profile update settings.compiler=gcc default
+conan profile update settings.compiler.version=13 default
+conan profile update settings.compiler.libcxx=libstdc++11 default
+conan profile update settings.compiler.cppstd=17 default
+
+conan install . --build=missing -s build_type=Release -s compiler.libcxx=libstdc++11
+
+cmake . \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBLAS_LIBRARIES="-lsci_gnu_82_mp -lgfortran" \
+  -DLAPACK_LIBRARIES="-lsci_gnu_82_mp -lgfortran"
+
+cmake --build .
+
+cd python
+python3 -m build --wheel
+
+```
+
+> **Note:** Fix any header paths as necessary in `pb` foler.
