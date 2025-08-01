@@ -157,6 +157,9 @@ make
 ```
 
 ## milvus-lite
+
+### Local Build - NERSC Perlmutter
+
 ```bash
 git clone https://github.com/milvus-io/milvus-lite.git
 cd milvus-lite
@@ -165,10 +168,8 @@ git submodule update --init --recursive
 module load python gcc-native/13 cmake cray-libsci
 python3 -m venv venv
 source venv/bin/activate
-pip install --upgrade pip setuptools wheel
+pip install --upgrade pip setuptools wheel build
 pip install "conan<2.0,>=1.59"
-export CONAN_USER_HOME=$SCRATCH/conan_cache
-mkdir -p $CONAN_USER_HOME
 conan profile new default --detect --force
 
 export CC=$(which gcc)
@@ -185,8 +186,8 @@ conan install . --build=missing -s build_type=Release -s compiler.libcxx=libstdc
 
 cmake . \
   -DCMAKE_BUILD_TYPE=Release \
-  -DBLAS_LIBRARIES="-lsci_gnu_82_mp -lgfortran" \
-  -DLAPACK_LIBRARIES="-lsci_gnu_82_mp -lgfortran"
+  -DBLAS_LIBRARIES="-lsci_gnu_mp -lgfortran" \
+  -DLAPACK_LIBRARIES="-lsci_gnu_mp -lgfortran"
 
 cmake --build .
 
