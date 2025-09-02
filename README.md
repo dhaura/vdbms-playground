@@ -197,3 +197,29 @@ python3 -m build --wheel
 ```
 
 > **Note:** Fix any header paths as necessary in `pb` foler.
+
+### Local Build - WSL
+```bash
+git clone https://github.com/dhaura/milvus-lite.git
+git submodule update --init --recursive
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip setuptools wheel build
+pip install "conan<2.0,>=1.59"
+chmod +x scripts/install_deps.sh
+./scripts/install_deps.sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+cd python
+python3 -m build --wheel
+```
+
+```bash
+git clone https://github.com/dhaura/vdbms-playground.git
+cd milvus-lite
+python3 -m venv venv
+source venv/bin/activate
+pip install path/to/built/wheel/milvus_lite-2.5.2-py3-none-manylinux2014_x86_64.whl
+pip install -U pymilvus
+python3 ml_test.py
+```
